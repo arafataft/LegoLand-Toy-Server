@@ -36,6 +36,19 @@ async function run() {
         res.send(result);
     })
 
+    app.get('/myToys/:email', async (req, res) => {
+        const { email } = req.params;
+      
+        try {
+          const toys = await toysInfo.find({ postedBy: email }).toArray();
+          res.status(200).json(toys);
+        } catch (error) {
+          console.log('Error:', error);
+          res.status(500).json({ error: 'Internal server error' });
+        }
+      });
+      
+
     app.post('/addToys', async (req, res) => {
         try {
           const toyData = req.body;
