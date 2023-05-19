@@ -26,12 +26,36 @@ async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
+
+    const toysInfo = client.db('legoland').collection('toyInfo');
+
+
+    app.get('/allToys', async (req, res) => {
+        const cursor = toysInfo.find();
+        const result = await cursor.toArray();
+        res.send(result);
+    })
+
+    app.post('/addToys', async (req, res) => {
+        try {
+          const toyData = req.body;
+          const result = await toysInfo.insertOne(toyData);
+            console.log(result);
+          res.status(201).json({ message: 'Toy added successfully' });
+        } catch (error) {
+          console.error(error);
+          res.status(500).json({ message: 'Error adding toy' });
+        }
+      });
+      
+
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
-    await client.close();
+    // await client.close();
   }
 }
 run().catch(console.dir);
