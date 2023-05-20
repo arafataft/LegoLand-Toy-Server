@@ -51,31 +51,34 @@ async function run() {
 
 
     app.get("/allToys", async (req, res) => {
-      const searchTerm = req.query.search || "";
-      const page = parseInt(req.query.page) || 1;
-      const limit = parseInt(req.query.limit) || 20; // Ensure limit is an integer
-    
-      const skip = (page - 1) * limit;
-    
+      const searchTerm = req.query.search;
+      const escapedSearchTerm = searchTerm.replace(/\\/g, "\\\\"); // backslashes  when input search '\' it get error so i escape backslashes by replace it
+
+      const page = parseInt(req.query.page);
+      const limit = parseInt(req.query.limit);
+
+      const query = {
+        $or: [
+          { name: { $regex: escapedSearchTerm, $options: "i" } },
+          { category: { $regex: escapedSearchTerm, $options: "i" } }
+        ]
+      };
+
       try {
-        const totalCount = await toysInfo.countDocuments({
-          name: { $regex: searchTerm, $options: "i" },
+        const totalCount = await toysInfo.countDocuments(query);
+        const toys = await toysInfo.find(query).skip((page - 1) * limit).limit(limit).toArray();
+
+        res.json({
+          totalCount,
+          toys
         });
-    
-        const toys = await toysInfo
-          .find({ name: { $regex: searchTerm, $options: "i" } })
-          .skip(skip)
-          .limit(limit)
-          .toArray();
-    
-        res.json({ totalCount, toys });
       } catch (error) {
         console.error(error);
-        res.status(500).json({ error: "An error occurred" });
+        res.status(500).json({ error: "Internal server error" });
       }
     });
-    
-    
+
+
 
 
     app.post('/addToys', async (req, res) => {
