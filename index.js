@@ -31,7 +31,7 @@ async function run() {
     const toysInfo = client.db('legoland').collection('toyInfo');
 
 
-    app.get('/allToys', async (req, res) => {
+    app.get('/allToy', async (req, res) => {
       const cursor = toysInfo.find();
       const result = await cursor.toArray();
       res.send(result);
