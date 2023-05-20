@@ -60,6 +60,23 @@ async function run() {
           res.status(500).json({ message: 'Error adding toy' });
         }
       });
+
+      app.put('/updateToy/:id', async (req, res) => {
+  const { id } = req.params;
+  const updatedToy = req.body;
+
+  try {
+    const result = await toysInfo.updateOne({ _id: ObjectId(id) }, { $set: updatedToy });
+    if (result.modifiedCount === 1) {
+      res.status(200).json({ message: 'Toy updated successfully' });
+    } else {
+      res.status(404).json({ error: 'Toy not found' });
+    }
+  } catch (error) {
+    console.log('Error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
       
 
 
