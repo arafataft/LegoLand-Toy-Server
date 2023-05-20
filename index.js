@@ -50,6 +50,34 @@ async function run() {
     });
 
 
+    app.get("/allToys", async (req, res) => {
+      const searchTerm = req.query.search || "";
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 20; // Ensure limit is an integer
+    
+      const skip = (page - 1) * limit;
+    
+      try {
+        const totalCount = await toysInfo.countDocuments({
+          name: { $regex: searchTerm, $options: "i" },
+        });
+    
+        const toys = await toysInfo
+          .find({ name: { $regex: searchTerm, $options: "i" } })
+          .skip(skip)
+          .limit(limit)
+          .toArray();
+    
+        res.json({ totalCount, toys });
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "An error occurred" });
+      }
+    });
+    
+    
+
+
     app.post('/addToys', async (req, res) => {
       try {
         const toyData = req.body;
