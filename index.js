@@ -39,15 +39,25 @@ async function run() {
 
     app.get('/myToys/:email', async (req, res) => {
       const { email } = req.params;
-
+      const { sortBy } = req.query;
+    
       try {
-        const toys = await toysInfo.find({ sellerEmail: email }).toArray();
+        let toys;
+        if (sortBy === 'price-asc') {
+          toys = await toysInfo.find({ sellerEmail: email }).sort({ price: 1 }).toArray();
+        } else if (sortBy === 'price-desc') {
+          toys = await toysInfo.find({ sellerEmail: email }).sort({ price: -1 }).toArray();
+        } else {
+          toys = await toysInfo.find({ sellerEmail: email }).toArray();
+        }
+    
         res.status(200).json(toys);
       } catch (error) {
         console.log('Error:', error);
         res.status(500).json({ error: 'Internal server error' });
       }
     });
+    
 
 
     app.get("/allToys", async (req, res) => {
